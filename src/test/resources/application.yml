@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
+
+keycloak:
+  introspection-uri: http://localhost
+  client-id: test
+  client-secret: test
+
+eureka:
+  client:
+    enabled: false
