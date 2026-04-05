@@ -3,6 +3,7 @@ package com.ua.petadoption.api_gateway.filter;
 import com.ua.petadoption.api_gateway.client.KeycloakIntrospectionClient;
 import com.ua.petadoption.commons.security.UserHeaders;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class KeycloakAuthorizationFilter implements GlobalFilter, Ordered {
@@ -54,6 +56,8 @@ public class KeycloakAuthorizationFilter implements GlobalFilter, Ordered {
     private Optional<String> extractBearerToken(ServerWebExchange exchange) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            log.warn("Unauthorized request to {} - missing or invalid Authorization header",
+                    exchange.getRequest().getPath());
             return Optional.empty();
         }
         return Optional.of(authHeader.substring(BEARER_PREFIX.length()));
@@ -66,8 +70,11 @@ public class KeycloakAuthorizationFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> processToken(Map<String, Object> claims, ServerWebExchange exchange, GatewayFilterChain chain) {
         if (!isActive(claims)) {
+            log.warn("Unauthorized request to {} - token is inactive", exchange.getRequest().getPath());
             return unauthorized(exchange);
         }
+        log.debug("Authenticated user {} for path {}",
+                claims.get(IntrospectionClaimNames.SUB), exchange.getRequest().getPath());
         return chain.filter(withUserHeaders(exchange, claims));
     }
 
