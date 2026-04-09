@@ -4,11 +4,11 @@ spring:
       enabled: false
       import-check:
         enabled: false
-
-keycloak:
-  introspection-uri: http://localhost
-  client-id: test
-  client-secret: test
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost/realms/test/protocol/openid-connect/certs
 
 eureka:
   client:
