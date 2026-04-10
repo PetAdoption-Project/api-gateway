@@ -26,7 +26,7 @@ class SecurityConfigTest {
     private ReactiveJwtDecoder jwtDecoder;
 
     @ParameterizedTest
-    @ValueSource(strings = {"/actuator/health", "/actuator/info", "/api/auth/register", "/api/auth/login"})
+    @ValueSource(strings = {"/actuator/health", "/actuator/info", "/api/auth/register", "/api/auth/login", "/api/auth/refresh"})
     void publicPath_shouldBeAccessibleWithoutToken(String path) {
         webTestClient.get().uri(path)
                 .exchange()
