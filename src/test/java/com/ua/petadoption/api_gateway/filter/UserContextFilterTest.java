@@ -72,7 +72,7 @@ class UserContextFilterTest {
         verify(chain).filter(captor.capture());
 
         HttpHeaders headers = captor.getValue().getRequest().getHeaders();
-        assertThat(headers.getFirst(UserHeaders.USER_ID)).isEqualTo("user-id");
+        assertThat(headers.getFirst(UserHeaders.AUTH_SUBJECT)).isEqualTo("user-id");
         assertThat(headers.getFirst(UserHeaders.USER_ROLES)).isEqualTo("ADOPTER");
     }
 
@@ -114,6 +114,28 @@ class UserContextFilterTest {
 
         assertThat(captor.getValue().getRequest().getHeaders().getFirst(UserHeaders.USER_ROLES))
                 .isEmpty();
+    }
+
+    @Test
+    void authenticatedRequest_clientHeadersShouldBeOverridden() {
+        Jwt jwt = buildJwt("real-id", List.of("ADOPTER"));
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get("/api/users/id")
+                        .header(UserHeaders.AUTH_SUBJECT, "attacker-id")
+                        .header(UserHeaders.USER_ROLES, "ADMIN")
+                        .build());
+
+        StepVerifier.create(
+                filter.filter(exchange, chain)
+                        .contextWrite(ReactiveSecurityContextHolder.withAuthentication(new JwtAuthenticationToken(jwt)))
+        ).verifyComplete();
+
+        ArgumentCaptor<ServerWebExchange> captor = ArgumentCaptor.forClass(ServerWebExchange.class);
+        verify(chain).filter(captor.capture());
+
+        HttpHeaders headers = captor.getValue().getRequest().getHeaders();
+        assertThat(headers.get(UserHeaders.AUTH_SUBJECT)).containsExactly("real-id");
+        assertThat(headers.get(UserHeaders.USER_ROLES)).containsExactly("ADOPTER");
     }
 
     private Jwt buildJwt(String subject, List<String> roles) {

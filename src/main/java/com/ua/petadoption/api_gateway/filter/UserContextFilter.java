@@ -37,7 +37,11 @@ public class UserContextFilter implements GlobalFilter, Ordered {
     private ServerWebExchange withUserHeaders(ServerWebExchange exchange, JwtAuthenticationToken auth) {
         return exchange.mutate()
                 .request(r -> r
-                        .header(UserHeaders.USER_ID, auth.getToken().getSubject())
+                        .headers(headers -> {
+                            headers.remove(UserHeaders.AUTH_SUBJECT);
+                            headers.remove(UserHeaders.USER_ROLES);
+                        })
+                        .header(UserHeaders.AUTH_SUBJECT, auth.getToken().getSubject())
                         .header(UserHeaders.USER_ROLES, extractRoles(auth))
                 )
                 .build();
