@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>com.ua.petadoption</groupId>
 			<artifactId>service-spring-boot-starter</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.1</version>
 		</dependency>
 
 		<!-- Lombok -->
@@ -89,6 +89,14 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>github-packages</id>
+			<url>https://maven.pkg.github.com/PetAdoption-Project/pet-adoption-commons</url>
+		</repository>
+	</repositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
